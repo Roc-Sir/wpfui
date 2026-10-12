@@ -17,14 +17,31 @@ namespace Wpf.Ui.Controls;
 /// </summary>
 public class FluentWindow : System.Windows.Window
 {
-    private WindowInteropHelper? _interopHelper = null;
+    private WindowInteropHelper? interopHelper = null;
+
+    /// <summary>
+    /// Set while <see cref="OnSourceInitialized"/> is applying the initial configuration.
+    /// </summary>
+    /// <remarks>
+    /// The initial pass supplies the style a window needs rather than reacting to a change the
+    /// application asked for, so it must not take the same path as a real change of
+    /// <see cref="ExtendsContentIntoTitleBar"/>, which deliberately forces the window style.
+    /// </remarks>
+    private bool isApplyingInitialState;
+
+#pragma warning disable IDISP006 // The lifetime is anchored to the window: Window.Closed disposes it in OnClosed.
+    /// <summary>
+    /// Keeps the client area of this window on the work area while it is maximized.
+    /// </summary>
+    private WindowWorkAreaClip? workAreaClip;
+#pragma warning restore IDISP006
 
     /// <summary>
     /// Gets contains helper for accessing this window handle.
     /// </summary>
     protected WindowInteropHelper InteropHelper
     {
-        get => _interopHelper ??= new WindowInteropHelper(this);
+        get => interopHelper ??= new WindowInteropHelper(this);
     }
 
     /// <summary>Identifies the <see cref="WindowCornerPreference"/> dependency property.</summary>
@@ -92,6 +109,8 @@ public class FluentWindow : System.Windows.Window
         }
     }
 
+
+
     /// <summary>
     /// Initializes static members of the <see cref="FluentWindow"/> class.
     /// Overrides default properties.
@@ -121,6 +140,9 @@ public class FluentWindow : System.Windows.Window
     /// <inheritdoc />
     protected override void OnClosed(EventArgs e)
     {
+        workAreaClip?.Dispose();
+        workAreaClip = null;
+
         ApplicationThemeManager.Changed -= OnApplicationThemeManagerChanged;
         base.OnClosed(e);
     }
@@ -128,11 +150,27 @@ public class FluentWindow : System.Windows.Window
     /// <inheritdoc />
     protected override void OnSourceInitialized(EventArgs e)
     {
-        OnCornerPreferenceChanged(default, WindowCornerPreference);
-        OnExtendsContentIntoTitleBarChanged(false, ExtendsContentIntoTitleBar);
-        OnBackdropTypeChanged(default, WindowBackdropType);
+        isApplyingInitialState = true;
+
+        try
+        {
+            OnCornerPreferenceChanged(default, WindowCornerPreference);
+            OnExtendsContentIntoTitleBarChanged(false, ExtendsContentIntoTitleBar);
+            OnBackdropTypeChanged(default, WindowBackdropType);
+        }
+        finally
+        {
+            isApplyingInitialState = false;
+        }
 
         base.OnSourceInitialized(e);
+
+        // After base, because the correction has to run after the hook the WPF WindowChrome installs
+        // for this window. This is what keeps the client area of a maximized window on the work area
+        // instead of letting it reach past the taskbar. SourceInitialized runs again when a handle is
+        // recreated, so the previous clip is released first to keep exactly one hook alive.
+        workAreaClip?.Dispose();
+        workAreaClip = WindowWorkAreaClip.Attach(this);
     }
 
     /// <inheritdoc />
@@ -278,14 +316,27 @@ public class FluentWindow : System.Windows.Window
     /// <summary>
     /// This virtual method is called when <see cref="ExtendsContentIntoTitleBar"/> is changed.
     /// </summary>
+    /// <remarks>
+    /// A window whose content reaches into the title bar needs a border style, because the WPF
+    /// <see cref="WindowChrome"/> removes the caption of a bordered window and nothing else. That style
+    /// is written only while the application has not chosen one itself. A window that asks for
+    /// <see cref="WindowStyle.None"/> - which is how a genuinely borderless shell is built - therefore
+    /// keeps it instead of being silently turned back into a bordered window.
+    /// </remarks>
     protected virtual void OnExtendsContentIntoTitleBarChanged(bool oldValue, bool newValue)
     {
         // AllowsTransparency = true;
-        SetCurrentValue(WindowStyleProperty, WindowStyle.SingleBorderWindow);
+        if (ReferenceEquals(ReadLocalValue(WindowStyleProperty), DependencyProperty.UnsetValue))
+        {
+            SetCurrentValue(WindowStyleProperty, WindowStyle.SingleBorderWindow);
+        }
 
         // WindowStyleProperty.OverrideMetadata(typeof(FluentWindow), new FrameworkPropertyMetadata(WindowStyle.SingleBorderWindow));
         // AllowsTransparencyProperty.OverrideMetadata(typeof(FluentWindow), new FrameworkPropertyMetadata(false));
-        _ = UnsafeNativeMethods.RemoveWindowTitlebarContents(this);
+        if (!isApplyingInitialState)
+        {
+            _ = UnsafeNativeMethods.RemoveWindowTitlebarContents(this);
+        }
     }
 
     /// <summary>
