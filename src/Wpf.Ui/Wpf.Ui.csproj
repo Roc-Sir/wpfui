@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>WPF-UI</PackageId>
+    <PackageId>Roc.WPF-UI</PackageId>
     <TargetFrameworks>net10.0-windows;net9.0-windows;net8.0-windows;net481;net472;net462</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>WPF UI provides the Fluent experience in your known and loved WPF framework. Intuitive design, themes, navigation and new immersive controls. All natively and effortlessly.</Description>

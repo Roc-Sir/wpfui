@@ -5,18 +5,18 @@
   </PropertyGroup>
   <PropertyGroup>
     <Version>4.3.0</Version>
-    <AssemblyVersion>4.3.0</AssemblyVersion>
+    <AssemblyVersion>4.3.0.0</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <Company>lepo.co</Company>
-    <Authors>lepo.co</Authors>
-    <Product>WPF-UI</Product>
+    <Company>Roc</Company>
+    <Authors>Roc</Authors>
+    <Product>Roc.WPF-UI</Product>
     <CommonTags>ui;wpf;toolkit;fluent;navigation;controls;design;icons;uwp;xaml;xamarin;theme;winui;mvvm;mvc;core;web;webview;dotnet;desktop;wpf-ui</CommonTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Copyright>Copyright (C) 2021-2026 Leszek Pomianowski and WPF UI Contributors</Copyright>
-    <PackageProjectUrl>https://github.com/lepoco/wpfui</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/lepoco/wpfui/releases</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/Roc-Sir/wpfui</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/Roc-Sir/wpfui/releases</PackageReleaseNotes>
     <PackageIcon>Icon.png</PackageIcon>
     <PackageIconUrl>https://github.com/lepoco/wpfui/main/build/nuget.png</PackageIconUrl>
     <RepositoryBranch>main</RepositoryBranch>

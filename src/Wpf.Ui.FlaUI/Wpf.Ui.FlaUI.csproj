@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>WPF-UI.FlaUI</PackageId>
+    <PackageId>Roc.WPF-UI.FlaUI</PackageId>
     <TargetFrameworks>net10.0-windows;net9.0-windows;net8.0-windows;net481;</TargetFrameworks>
     <Description>FlaUI automation library integration for WPF UI library.</Description>
     <CommonTags>$(CommonTags);syntax;highlight;flaui;fla;ui;ua3;ua2;ui;automation</CommonTags>
